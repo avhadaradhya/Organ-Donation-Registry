@@ -1,7 +1,7 @@
 package com.organdonation.registry.controller;
 
-import com.organdonation.registry.model.Donor;
-import com.organdonation.registry.repository.DonorRepository;
+import com.organdonation.registry.model.*;
+import com.organdonation.registry.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,23 +14,44 @@ import java.time.LocalDate;
 @Controller
 public class RegistryController {
 
-    @Autowired
-    private DonorRepository donorRepository;
+    @Autowired private DonorRepository donorRepository;
+    @Autowired private RecipientRepository recipientRepository;
+    @Autowired private HospitalRepository hospitalRepository;
+    @Autowired private OrganMatchRepository matchRepository;
 
-    // This method handles displaying the webpage when you visit the site
     @GetMapping("/")
     public String showHomePage(Model model) {
-        // Creates an empty Donor object to bind to our HTML form
-    	model.addAttribute("donor", new Donor());        // Fetches all donors to display on the dashboard
+        // Prepare empty objects for the forms
+        model.addAttribute("donor", new Donor());
+        model.addAttribute("recipient", new Recipient());
+        model.addAttribute("hospital", new Hospital());
+
+        // Fetch data to display in tables
         model.addAttribute("donorsList", donorRepository.findAll());
-        return "index"; // This tells Spring to look for index.html
+        model.addAttribute("recipientsList", recipientRepository.findAll());
+        model.addAttribute("hospitalsList", hospitalRepository.findAll());
+        model.addAttribute("matchesList", matchRepository.findAll());
+        
+        return "index";
     }
 
-    // This method handles the form submission when you click "Save"
     @PostMapping("/addDonor")
     public String saveDonor(@ModelAttribute("donor") Donor donor) {
-        donor.setRegistrationDate(LocalDate.now()); // Set today's date automatically
-        donorRepository.save(donor); // Save to MySQL!
-        return "redirect:/"; // Reload the home page
+        donor.setRegistrationDate(LocalDate.now());
+        donorRepository.save(donor);
+        return "redirect:/";
+    }
+
+    @PostMapping("/addRecipient")
+    public String saveRecipient(@ModelAttribute("recipient") Recipient recipient) {
+        recipient.setRequestDate(LocalDate.now());
+        recipientRepository.save(recipient);
+        return "redirect:/";
+    }
+
+    @PostMapping("/addHospital")
+    public String saveHospital(@ModelAttribute("hospital") Hospital hospital) {
+        hospitalRepository.save(hospital);
+        return "redirect:/";
     }
 }
